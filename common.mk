@@ -139,8 +139,7 @@ PRODUCT_COPY_FILES += \
     $(COMMON_FOLDER)/firmware/wpan/bluetooth/TIInit_7.6.15.bts:system/etc/firmware/TIInit_7.6.15.bts \
     $(COMMON_FOLDER)/firmware/wpan/bluetooth/TIInit_12.7.27.bts:system/etc/firmware/TIInit_12.7.27.bts
 
-
-# Rootfs files
+# Root files
 PRODUCT_COPY_FILES += \
     $(COMMON_FOLDER)/root/default.prop:/root/default.prop \
     $(COMMON_FOLDER)/root/init.mapphone_cdma.rc:/root/init.mapphone_cdma.rc \
@@ -150,10 +149,16 @@ PRODUCT_COPY_FILES += \
     $(COMMON_FOLDER)/root/ueventd.mapphone.rc:/root/ueventd.mapphone_umts.rc
 
 # Kexec files
+# Don't add these for solana -- they're in the solana device setup
+ifneq ($(TARGET_DEVICE),solana)
 PRODUCT_COPY_FILES += \
     $(COMMON_FOLDER)/kexec/arm_kexec.ko:system/etc/kexec/arm_kexec.ko \
     $(COMMON_FOLDER)/kexec/kexec.ko:system/etc/kexec/kexec.ko \
-    $(COMMON_FOLDER)/kexec/uart.ko:system/etc/kexec/uart.ko \
+    $(COMMON_FOLDER)/kexec/uart.ko:system/etc/kexec/uart.ko
+endif
+
+# Common kexec files
+PRODUCT_COPY_FILES += \
     $(COMMON_FOLDER)/kexec/atags:system/etc/kexec/atags \
     $(COMMON_FOLDER)/kexec/kexec:system/etc/kexec/kexec
 
