@@ -102,7 +102,8 @@ PRODUCT_PACKAGES += \
     evtest \
     DockAudio \
     libjni_filtershow_filters \
-    libjni_mosaic
+    libjni_mosaic \
+    Torch
 
 # Permissions files
 PRODUCT_COPY_FILES += \
