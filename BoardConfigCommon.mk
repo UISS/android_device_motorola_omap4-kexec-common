@@ -97,6 +97,7 @@ COMMON_GLOBAL_CFLAGS += -DMR0_AUDIO_BLOB
 
 # Bluetooth
 BOARD_HAVE_BLUETOOTH := true
+BOARD_WPAN_DEVICE := true
 BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := device/motorola/omap4-kexec-common/bluetooth
 
 # gps
