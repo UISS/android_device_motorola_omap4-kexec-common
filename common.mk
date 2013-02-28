@@ -163,6 +163,10 @@ PRODUCT_COPY_FILES += \
     $(COMMON_FOLDER)/prebuilt/bin/bbx:/root/sbin/bbx \
     $(COMMON_FOLDER)/prebuilt/bin/fixboot.sh:/root/sbin/fixboot.sh
 
+# Fix ubuntu-session file for lower PPI/GRID_UNIT
+PRODUCT_COPY_FILES += \
+    $(COMMON_FOLDER)/ubuntu-session:system/etc/ubuntu-session \
+
 # sw vsync setting
 PRODUCT_PROPERTY_OVERRIDES += \
     persist.hwc.sw_vsync=1
