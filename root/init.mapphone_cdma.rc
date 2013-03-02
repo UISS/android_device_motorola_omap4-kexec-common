@@ -328,6 +328,8 @@ on boot
    chown system system /sys/module/bmp180/parameters/poll_interval
    chmod 0660 /sys/module/bmp180/parameters/enable
    chown system system /sys/module/bmp180/parameters/enable
+   chmod 0666 /dev/msp430
+   chmod 0666 /dev/ct405
 # Change the ownership of touch screen file
    chown root mot_tcmd /sys/bus/i2c/drivers/qtouch-obp-ts/2-005b/irq_enable
    chown root mot_tcmd /sys/bus/i2c/drivers/qtouch-obp-ts/2-004a/irq_enable
