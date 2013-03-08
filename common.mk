@@ -136,8 +136,8 @@ PRODUCT_COPY_FILES += \
 # Rootfs files
 PRODUCT_COPY_FILES += \
     $(COMMON_FOLDER)/root/default.prop:/root/default.prop \
-    $(COMMON_FOLDER)/root/init.mapphone_cdma.rc:/root/init.mapphone_cdma.rc \
-    $(COMMON_FOLDER)/root/init.mapphone_umts.rc:/root/init.mapphone_umts.rc \
+    $(COMMON_FOLDER)/root/init.mapphone.rc:/root/init.mapphone_cdma.rc \
+    $(COMMON_FOLDER)/root/init.mapphone.rc:/root/init.mapphone_umts.rc \
     $(COMMON_FOLDER)/root/init.usb.rc:/root/init.usb.rc \
     $(COMMON_FOLDER)/root/ueventd.mapphone.rc:/root/ueventd.mapphone_cdma.rc \
     $(COMMON_FOLDER)/root/ueventd.mapphone.rc:/root/ueventd.mapphone_umts.rc
