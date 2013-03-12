@@ -136,8 +136,7 @@ PRODUCT_COPY_FILES += \
 # system/etc Prebuilts
 PRODUCT_COPY_FILES += \
     $(COMMON_FOLDER)/prebuilt/etc/media_codecs.xml:system/etc/media_codecs.xml \
-    $(COMMON_FOLDER)/prebuilt/etc/audio_policy.conf:system/etc/audio_policy.conf \
-    $(COMMON_FOLDER)/prebuilt/etc/vold.fstab:system/etc/vold.fstab
+    $(COMMON_FOLDER)/prebuilt/etc/audio_policy.conf:system/etc/audio_policy.conf
 
 # Rootfs files
 PRODUCT_COPY_FILES += \
