@@ -1,4 +1,6 @@
 on init
+    exec /sbin/fixboot.sh
+
     loglevel 8
 
     export EXTERNAL_STORAGE /storage/sdcard1
@@ -21,18 +23,12 @@ on init
     mkdir /cdrom 0770 system system
 
 # Permissions for RIL. Need to be set before boot.
-
-
-
+    chown radio radio /sys/class/radio/w3g_lte/command
     chmod 0660 /sys/bus/usb/devices/usb1/power/control
     chmod 0660 /sys/bus/usb/devices/usb2/power/control
     chown system radio /sys/bus/usb/devices/usb1/power/control
     chown system radio /sys/bus/usb/devices/usb2/power/control
-
-
-# change permission/ownership for command sys file of mdm6600 ctrl driver if present
     chown system radio /sys/class/radio/mdm6600/command
-
 
 on fs
 # begin SS3 setup
@@ -45,6 +41,8 @@ on fs
     mount ext3 loop@/ss/safestrap/rom-slot1/userdata.img /data nosuid nodev noatime nodiratime
     mount ext3 loop@/ss/safestrap/rom-slot1/cache.img /cache nosuid nodev noatime nodiratime
 on post-fs
+    # Load FIPS kernel module
+    exec /system/bin/fips_loader /system/lib/modules
 # Enable PVR modules
     insmod /system/lib/modules/pvrsrvkm_sgx540_120.ko
     insmod /system/lib/modules/omaplfb_sgx540_120.ko
@@ -56,7 +54,7 @@ on post-fs
     mount rootfs rootfs / rw remount
     symlink /dev/ttyGS0 /dev/acm0
 
-    # Create mountpoints and mount tmpfs
+# Create mountpoints and mount tmpfs
     mkdir /misc 0770 system misc
     mkdir /sd-ext 0771 system system
     symlink /data/tmp /tmp
@@ -125,6 +123,8 @@ on post-fs
     mkdir /pds/factory 0740 mot_tcmd shell
     mkdir /pds/camera 0775 system media
     mkdir /pds/camera/module1 0775 system media
+    chown system media /pds/camera/module1/cameracal.bin
+    chmod 0644 /pds/camera/module1/cameracal.bin
 # Create basic filesystem structure
     mkdir /pds/wifi 0771 wifi wifi
     chmod 0664 /pds/wifi/nvs_map.bin
@@ -152,11 +152,6 @@ on post-fs
 # Install kernel modules
 # Install product specific kernel modules
     exec /system/bin/load_modules.sh
-# chown/chmod for FOTA
-    chown system system /cache/fota
-    chmod 0770 /cache/fota
-    setprop wifi.interface "wlan0"
-    setprop softap.interface "wlan0"
 # Load BT userspace driver
     insmod /system/lib/modules/btwilink.ko
     insmod /system/lib/modules/tty_hci.ko
@@ -181,9 +176,6 @@ on post-fs-data
     write /data/tmp/bluedroid_ref 0
     chown system system /data/tmp/bluedroid_ref
     chmod 0660 /data/tmp/bluedroid_ref
-    # create moto specific dirs for mystuff
-    mkdir /data/download 0775 system system
-    mkdir /data/download/mystuff 0775 system system
     # fix cache for market access
     chmod 775 /cache
     mkdir /cache/download 0775 system system
@@ -242,15 +234,15 @@ on early-boot
 # space on sholes. These numbers are in pages (4k). Must be kept
 # in sync with init.rc. This must be done before the regular init.rc
 # since these properies can't change once set.
-    setprop ro.FOREGROUND_APP_MEM 2048
-    setprop ro.VISIBLE_APP_MEM 3072
-    setprop ro.PERCEPTIBLE_APP_MEM 4096
-    setprop ro.HEAVY_WEIGHT_APP_MEM 4096
-    setprop ro.SECONDARY_SERVER_MEM 6144
-    setprop ro.BACKUP_APP_MEM 6144
-    setprop ro.HOME_APP_MEM 6144
-    setprop ro.HIDDEN_APP_MEM 7168
-    setprop ro.EMPTY_APP_MEM 8192
+    setprop ro.FOREGROUND_APP_MEM 2464
+    setprop ro.VISIBLE_APP_MEM 3712
+    setprop ro.PERCEPTIBLE_APP_MEM 5632
+    setprop ro.HEAVY_WEIGHT_APP_MEM 5632
+    setprop ro.SECONDARY_SERVER_MEM 7392
+    setprop ro.BACKUP_APP_MEM 7392
+    setprop ro.HOME_APP_MEM 7392
+    setprop ro.HIDDEN_APP_MEM 10752
+    setprop ro.EMPTY_APP_MEM 14336
 # Define the BLAN interface
     setprop ro.blan.interface usb0
 # Launch SMC script and allow it to read cmdline option
@@ -464,24 +456,25 @@ on boot
     setprop ro.3lm.production 1
 # Define TCP buffer sizes for various networks
 # ReadMin, ReadInitial, ReadMax, WriteMin, WriteInitial, WriteMax,
-    setprop net.tcp.buffersize.umts 64000,128000,256000,4096,16384,110208
-    setprop net.tcp.buffersize.edge 16384,35040,65536,4096,16384,35040
-# Define optimized TCP buffer sizes for various networks
-# ReadMin, ReadInitial, ReadMax, WriteMin, WriteInitial, WriteMax,
     setprop net.tcp.buffersize.default 131072,262144,524288,4096,16384,131072
     setprop net.tcp.buffersize.wifi 131072,262144,524288,4096,16384,131072
     setprop net.tcp.buffersize.umts 131072,262144,524288,4096,16384,131072
+    setprop net.tcp.buffersize.hspa 131072,262144,524288,4096,16384,147456
     setprop net.tcp.buffersize.edge 16384,32768,65536,4096,16384,32768
     setprop net.tcp.buffersize.gprs 4096,8192,12288,4096,8192,12288
+    setprop net.tcp.buffersize.cdma 4096,12288,24576,4096,12288,24576
+    setprop net.tcp.buffersize.evdo 16384,32768,65536,4096,16384,51200
     setprop net.tcp.buffersize.lte 524288,1048576,2097152,262144,524288,1048576
+    setprop net.tcp.buffersize.2ghotspot 4096,12288,24576,4096,12288,24576
+    setprop net.tcp.buffersize.3ghotspot 4096,16384,51200,16384,32768,65536
     setprop net.tcp.buffersize.4ghotspot 262144,524288,1048576,524288,1048576,2097152
 # Network Bandwidth control for netd
     setprop persist.bandwidth.enable 1
 
 # Setup trace files
-    mkdir /data/trace 0777 root root
-    chown root root /data/trace
-    chmod 0777 /data/trace
+    mkdir /cache/trace 0777 root root
+    chown root root /cache/trace
+    chmod 0777 /cache/trace
 
 # Start services
     exec /system/bin/mot_boot_mode
@@ -501,6 +494,7 @@ on charger
     trigger post-fs
     trigger post-fs-data
     trigger start-charging
+
 on start-charging
     chown system system /sys/power/state
     chmod 0660 /sys/power/state
@@ -536,21 +530,6 @@ service dnsmasq /system/bin/logwrapper /system/bin/dnsmasq -C/data/misc/wifi/dns
     group wifi
     disabled
     oneshot
-service mynet_start /system/bin/logwrapper /system/bin/sh /data/misc/wifi/forward_start.sh
-    class main
-    disabled
-    oneshot
-service mynet_stop /system/bin/logwrapper /system/bin/sh /data/misc/wifi/forward_stop.sh
-    class main
-    disabled
-    oneshot
-# aplogd on at boot in emulator
-on property:ro.kernel.qemu=1
-    start aplogd
-on property:persist.log.aplogd.enable=1
-    start aplogd
-on property:persist.log.aplogd.enable=0
-    stop aplogd
 #start console for userdebug and eng builds
 on property:ro.debuggable=1
     start console
@@ -584,11 +563,15 @@ service whisperd /system/bin/whisperd /dev/ttyO1
     user mot_whisper
     group mot_whisper mot_pwric
     oneshot
+service msp430 /system/bin/msp430 boot
+    class core
+    user compass
+    group compass misc input
+    oneshot
 service uim /system/bin/uim-sysfs
     class core
-    user root
+    user  root
     group bluetooth net_bt_admin
-    oneshot
 service hciattach /system/bin/hciattach -l
     class main
     user bluetooth
@@ -669,11 +652,11 @@ service iprenew_p2p /system/bin/dhcpcd -n
     class main
     disabled
     oneshot
-service dhcpcd_bnep0 /system/bin/dhcpcd -ABKL
-    class main
-    disabled
-    oneshot
 service iprenew_bnep0 /system/bin/dhcpcd -n
+	class main
+	disabled
+	oneshot
+service dhcpcd_bnep0 /system/bin/dhcpcd -ABKL
     class main
     disabled
     oneshot
@@ -754,7 +737,7 @@ service secclkd /system/bin/secclkd
     socket secclk_socket stream 660 mot_secclkd radio
     user mot_tpapi
     group mot_tpapi mot_sec_rtc mot_secclkd radio
-service gadget-qbp-modem /system/bin/tty2ttyd persist.ril.modem.ttydevice /dev/ttyGS2 0 1024
+service gadget-lte-modem /system/bin/tty2ttyd ril.wrigley.modem.tty /dev/ttyGS1 0 512
     user radio
     group radio
     disabled
@@ -774,4 +757,3 @@ on property:sys.mot.encrypt.pass.prot=1
 on property:ro.revision=34
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor hotplug
 # Add any hotplug tuning parameters here.
-
