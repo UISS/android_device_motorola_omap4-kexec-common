@@ -156,8 +156,8 @@ PRODUCT_COPY_FILES += \
     $(COMMON_FOLDER)/prebuilt/bin/fixboot.sh:/root/sbin/fixboot.sh
 
 # sw vsync setting
-#PRODUCT_PROPERTY_OVERRIDES += \
-#    persist.hwc.sw_vsync=0
+PRODUCT_PROPERTY_OVERRIDES += \
+    persist.hwc.sw_vsync=1
 
 # General
 PRODUCT_PROPERTY_OVERRIDES += \
