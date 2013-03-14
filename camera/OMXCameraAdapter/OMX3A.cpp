@@ -1779,7 +1779,7 @@ status_t OMXCameraAdapter::setMeteringAreas(Gen3A_settings& Gen3A)
       }
 
       eError =  OMX_SetConfig(mCameraAdapterParameters.mHandleComp,
-                                (OMX_INDEXTYPE) OMX_TI_IndexConfigAlgoAreas, bufferlist[0].opaque); // &sharedBuffer
+                                (OMX_INDEXTYPE) OMX_TI_IndexConfigAlgoAreas, &sharedBuffer);
 
   if ( OMX_ErrorNone != eError )
       {
