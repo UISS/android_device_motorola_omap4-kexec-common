@@ -91,7 +91,7 @@ PRODUCT_PACKAGES += \
     libOMX.TI.DUCATI1.MISC.SAMPLE \
     libstagefrighthw \
     libI420colorconvert \
-    libtiutils \
+    libtiutils_custom \
     libion_ti \
     smc_pa_ctrl \
     tf_daemon \
