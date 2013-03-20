@@ -91,7 +91,7 @@ PRODUCT_PACKAGES += \
     libOMX.TI.DUCATI1.MISC.SAMPLE \
     libstagefrighthw \
     libI420colorconvert \
-    libtiutils \
+    libtiutils_custom \
     libion_ti \
     smc_pa_ctrl \
     tf_daemon \
@@ -133,11 +133,16 @@ PRODUCT_COPY_FILES += \
     $(COMMON_FOLDER)/firmware/ti-connectivity/wl128x-fw-4-sr.bin:system/etc/firmware/ti-connectivity/wl128x-fw-4-sr.bin \
     $(COMMON_FOLDER)/firmware/ti-connectivity/wl1271-nvs.bin:system/etc/firmware/ti-connectivity/wl1271-nvs.bin
 
+# system/etc Prebuilts
+PRODUCT_COPY_FILES += \
+    $(COMMON_FOLDER)/prebuilt/etc/media_codecs.xml:system/etc/media_codecs.xml \
+    $(COMMON_FOLDER)/prebuilt/etc/audio_policy.conf:system/etc/audio_policy.conf
+
 # Rootfs files
 PRODUCT_COPY_FILES += \
     $(COMMON_FOLDER)/root/default.prop:/root/default.prop \
-    $(COMMON_FOLDER)/root/init.mapphone_cdma.rc:/root/init.mapphone_cdma.rc \
-    $(COMMON_FOLDER)/root/init.mapphone_umts.rc:/root/init.mapphone_umts.rc \
+    $(COMMON_FOLDER)/root/init.mapphone.rc:/root/init.mapphone_cdma.rc \
+    $(COMMON_FOLDER)/root/init.mapphone.rc:/root/init.mapphone_umts.rc \
     $(COMMON_FOLDER)/root/init.usb.rc:/root/init.usb.rc \
     $(COMMON_FOLDER)/root/ueventd.mapphone.rc:/root/ueventd.mapphone_cdma.rc \
     $(COMMON_FOLDER)/root/ueventd.mapphone.rc:/root/ueventd.mapphone_umts.rc
