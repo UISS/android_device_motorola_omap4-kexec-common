@@ -1,15 +1,15 @@
-COMMON_FOLDER := device/motorola/omap4-kexec-common
-
-# inherit from kexec if exists
--include device/motorola/kexec/BoardConfig.mk
+#
+# This file sets variables that control the way modules are built
+# thorughout the system. It should not be used to conditionally
+# disable makefiles (the proper mechanism to control what gets
+# included in a build is to use PRODUCT_PACKAGES in a product
+# definition file).
+#
 
 # set to allow building from common
 BOARD_VENDOR := motorola-omap4-kexec
 
-BOARD_USES_KEXEC := true
-ifdef BOARD_USES_KEXEC
-COMMON_GLOBAL_CFLAGS += -DBOARD_USES_KEXEC
-endif
+COMMON_FOLDER := device/motorola/omap4-kexec-common
 
 # Custom includes for kernel and frameworks
 PRODUCT_VENDOR_KERNEL_HEADERS := $(COMMON_FOLDER)/kernel-headers
@@ -141,7 +141,6 @@ TARGET_RECOVERY_PRE_COMMAND := "echo 1 > /data/.recovery_mode; sync; \#"
 TARGET_RECOVERY_PRE_COMMAND_CLEAR_REASON := true
 TARGET_RECOVERY_PIXEL_FORMAT := "BGRA_8888"
 
-
 # Graphics
 BOARD_EGL_CFG := device/motorola/omap4-kexec-common/prebuilt/etc/egl.cfg
 USE_OPENGL_RENDERER := true
@@ -186,11 +185,6 @@ TARGET_NR_SVC_SUPP_GIDS := 28
 BOARD_USE_MOTOROLA_DEV_ALIAS := true
 ifdef BOARD_USE_MOTOROLA_DEV_ALIAS
 COMMON_GLOBAL_CFLAGS += -DBOARD_USE_MOTOROLA_DEV_ALIAS
-endif
-
-USE_MOTOROLA_CODE := true
-ifdef USE_MOTOROLA_CODE
-COMMON_GLOBAL_CFLAGS += -DUSE_MOTOROLA_CODE
 endif
 
 # Media / Radio

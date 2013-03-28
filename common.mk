@@ -3,7 +3,6 @@
 #
 
 COMMON_FOLDER := device/motorola/omap4-kexec-common
-BOARD_USES_KEXEC := true
 
 # The gps config appropriate for this device
 PRODUCT_COPY_FILES += \
@@ -79,6 +78,10 @@ PRODUCT_PACKAGES += \
     motobox \
     usbd
 
+#symlinks
+PRODUCT_PACKAGES += \
+    libion.so
+
 # OMAP4
 PRODUCT_PACKAGES += \
     libdomx \
@@ -96,7 +99,8 @@ PRODUCT_PACKAGES += \
     smc_pa_ctrl \
     tf_daemon \
     libtf_crypto_sst \
-    libmm_osal
+    libmm_osal \
+    gralloc.omap4.so
 
 PRODUCT_PACKAGES += \
     evtest \
@@ -141,24 +145,44 @@ PRODUCT_COPY_FILES += \
 # Rootfs files
 PRODUCT_COPY_FILES += \
     $(COMMON_FOLDER)/root/default.prop:/root/default.prop \
-    $(COMMON_FOLDER)/root/init.mapphone.rc:/root/init.mapphone_cdma.rc \
-    $(COMMON_FOLDER)/root/init.mapphone.rc:/root/init.mapphone_umts.rc \
     $(COMMON_FOLDER)/root/init.usb.rc:/root/init.usb.rc \
     $(COMMON_FOLDER)/root/ueventd.mapphone.rc:/root/ueventd.mapphone_cdma.rc \
-    $(COMMON_FOLDER)/root/ueventd.mapphone.rc:/root/ueventd.mapphone_umts.rc
+    $(COMMON_FOLDER)/root/ueventd.mapphone.rc:/root/ueventd.mapphone_umts.rc \
+    $(COMMON_FOLDER)/root/init.safestrap-stock.rc:/root/init.safestrap-stock.rc \
+    $(COMMON_FOLDER)/root/init.safestrap-rom-slot1.rc:/root/init.safestrap-rom-slot1.rc \
+    $(COMMON_FOLDER)/root/init.safestrap-rom-slot2.rc:/root/init.safestrap-rom-slot2.rc \
+    $(COMMON_FOLDER)/root/init.safestrap-rom-slot3.rc:/root/init.safestrap-rom-slot3.rc \
+    $(COMMON_FOLDER)/root/init.safestrap-rom-slot4.rc:/root/init.safestrap-rom-slot4.rc \
+    $(COMMON_FOLDER)/root/init.safestrap-rom-slot5.rc:/root/init.safestrap-rom-slot5.rc \
+    $(COMMON_FOLDER)/root/init.safestrap-rom-slot6.rc:/root/init.safestrap-rom-slot6.rc \
+    $(COMMON_FOLDER)/root/init.safestrap-rom-slot7.rc:/root/init.safestrap-rom-slot7.rc \
+    $(COMMON_FOLDER)/root/init.safestrap-rom-slot8.rc:/root/init.safestrap-rom-slot8.rc
+
+# Rootfs files for the 1GB devices
+ifndef TARGET_USES_CUSTOM_INITFILES
+PRODUCT_COPY_FILES += \
+    $(COMMON_FOLDER)/root/init.mapphone.rc:/root/init.mapphone_cdma.rc \
+    $(COMMON_FOLDER)/root/init.mapphone.rc:/root/init.mapphone_umts.rc
+endif
 
 # Kexec files
 PRODUCT_COPY_FILES += \
-    $(COMMON_FOLDER)/kexec/arm_kexec.ko:system/etc/kexec/arm_kexec.ko \
-    $(COMMON_FOLDER)/kexec/kexec.ko:system/etc/kexec/kexec.ko \
-    $(COMMON_FOLDER)/kexec/uart.ko:system/etc/kexec/uart.ko \
     $(COMMON_FOLDER)/kexec/atags:system/etc/kexec/atags \
     $(COMMON_FOLDER)/kexec/kexec:system/etc/kexec/kexec
+
+# Kexec modules for 1GB devices based on 3.0.8 kernel
+ifndef TARGET_USES_CUSTOM_INITFILES
+PRODUCT_COPY_FILES += \
+    $(COMMON_FOLDER)/kexec/arm_kexec.ko:system/etc/kexec/arm_kexec.ko \
+    $(COMMON_FOLDER)/kexec/kexec.ko:system/etc/kexec/kexec.ko \
+    $(COMMON_FOLDER)/kexec/uart.ko:system/etc/kexec/uart.ko
+endif
 
 # Bin files for kexec load
 PRODUCT_COPY_FILES += \
     $(COMMON_FOLDER)/prebuilt/bin/bbx:/root/sbin/bbx \
-    $(COMMON_FOLDER)/prebuilt/bin/fixboot.sh:/root/sbin/fixboot.sh
+
+#    $(COMMON_FOLDER)/prebuilt/bin/fixboot.sh:/root/sbin/fixboot.sh
 
 # sw vsync setting
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -222,6 +246,13 @@ PRODUCT_PROPERTY_OVERRIDES += \
     wifi.ap.interface=wlan0 \
     wifi.supplicant_scan_interval=90
 
+PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
+    ro.boot.safestrap.romslot=rom-slot1
+
+# Define SDcard for use with CMUpdater
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.cm.updater.sdcard=sdcard-ext
+
 # we have enough storage space to hold precise GC data
 PRODUCT_TAGS += dalvik.gc.type-precise
 
@@ -231,5 +262,4 @@ PRODUCT_LOCALES += en_US
 # stuff specific to ti OMAP4 hardware
 #$(call inherit-product, hardware/ti/omap4xxx/omap4.mk)
 $(call inherit-product, hardware/ti/omap4xxx/security/Android.mk)
-$(call inherit-product-if-exists, $(COMMON_FOLDER)/imgtec/sgx-imgtec-bins.mk)
 $(call inherit-product-if-exists, vendor/motorola/omap4-common/common-vendor.mk)
