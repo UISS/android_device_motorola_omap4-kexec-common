@@ -1,0 +1,11 @@
+on fs
+    mount rootfs rootfs / rw remount
+    mkdir /ss 0777 root root
+    chown root root /ss
+    chmod 0777 /ss
+    mount vfat /dev/block/mmcblk0p1 /ss
+
+    mount ext3 loop@/ss/safestrap/rom-slot8/system.img /system wait discard noatime nodiratime barrier=1
+    mount ext3 loop@/ss/safestrap/rom-slot8/userdata.img /data discard nosuid nodev noatime nodiratime
+    mount ext3 loop@/ss/safestrap/rom-slot8/cache.img /cache discard nosuid nodev noatime nodiratime
+

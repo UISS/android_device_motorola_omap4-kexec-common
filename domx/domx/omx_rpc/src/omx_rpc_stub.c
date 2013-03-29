@@ -52,7 +52,6 @@
 /******************************************************************
  *   INCLUDE FILES
  ******************************************************************/
-#include <errno.h>
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -100,13 +99,8 @@
     status = write(hCtx->fd_omx, pPacket, nPacketSize); \
     RPC_freePacket(pPacket); \
     pPacket = NULL; \
-    if(status < 0 && errno == ENXIO) {  \
-         RPC_assert(0, RPC_OMX_ErrorHardware, "Write failed - Ducati in faulty state"); \
-    }  \
-    if(status != (signed)nPacketSize) { \
-        DOMX_ERROR("Write failed returning status = 0x%x",status); \
-        RPC_assert(0, RPC_OMX_ErrorUndefined, "Write failed"); \
-    }  \
+    if(status < 0 ) DOMX_ERROR("DOMX Write failed 0x%x %d",status,status); \
+    RPC_assert(status >= 0, RPC_OMX_ErrorUndefined, "Write failed"); \
     eError = TIMM_OSAL_ReadFromPipe(hCtx->pMsgPipe[nFxnIdx], &pRetPacket, \
         RPC_MSG_SIZE_FOR_PIPE, (TIMM_OSAL_U32 *)(&nSize), TIMM_OSAL_SUSPEND); \
     RPC_assert(eError == TIMM_OSAL_ERR_NONE, eError, \
@@ -230,7 +224,7 @@ RPC_OMX_ERRORTYPE RPC_GetHandle(OMX_HANDLETYPE hRPCCtx,
       EXIT:
 	if (pPacket)
 		RPC_freePacket(pPacket);
-	if (pRetPacket && *eCompReturn != OMX_ErrorHardware)
+	if (pRetPacket)
 		RPC_freePacket(pRetPacket);
 
 	DOMX_EXIT("");
@@ -283,7 +277,7 @@ RPC_OMX_ERRORTYPE RPC_FreeHandle(OMX_HANDLETYPE hRPCCtx,
       EXIT:
 	if (pPacket)
 		RPC_freePacket(pPacket);
-	if (pRetPacket && *eCompReturn != OMX_ErrorHardware)
+	if (pRetPacket)
 		RPC_freePacket(pRetPacket);
 
 	DOMX_EXIT("");
@@ -306,7 +300,7 @@ RPC_OMX_ERRORTYPE RPC_FreeHandle(OMX_HANDLETYPE hRPCCtx,
 /* ===========================================================================*/
 RPC_OMX_ERRORTYPE RPC_SetParameter(OMX_HANDLETYPE hRPCCtx,
     OMX_INDEXTYPE nParamIndex, OMX_PTR pCompParam,
-    OMX_PTR pLocBufNeedMap, OMX_U32 nNumOfLocalBuf, OMX_ERRORTYPE * eCompReturn)
+    OMX_PTR pLocBufNeedMap, OMX_ERRORTYPE * eCompReturn)
 {
 
 	RPC_OMX_ERRORTYPE eRPCError = RPC_OMX_ErrorNone;
@@ -326,14 +320,8 @@ RPC_OMX_ERRORTYPE RPC_SetParameter(OMX_HANDLETYPE hRPCCtx,
 	RPC_initPacket(pPacket, pOmxPacket, pData, nFxnIdx, nPacketSize);
 
 	if (pLocBufNeedMap != NULL && (pLocBufNeedMap - pCompParam) >= 0 ) {
-		if (nNumOfLocalBuf == 1) {
-			RPC_SETFIELDVALUE(pData, nPos, RPC_OMX_MAP_INFO_ONE_BUF,
-				RPC_OMX_MAP_INFO_TYPE);
-		}
-		else if (nNumOfLocalBuf == 2) {
-			RPC_SETFIELDVALUE(pData, nPos, RPC_OMX_MAP_INFO_TWO_BUF,
-				RPC_OMX_MAP_INFO_TYPE);
-		}
+		RPC_SETFIELDVALUE(pData, nPos, RPC_OMX_MAP_INFO_ONE_BUF,
+			RPC_OMX_MAP_INFO_TYPE);
 		nOffset = (pLocBufNeedMap - pCompParam) +
 			sizeof(RPC_OMX_MAP_INFO_TYPE) + sizeof(OMX_U32) +
 			sizeof(OMX_HANDLETYPE) + sizeof(OMX_INDEXTYPE);
@@ -358,7 +346,7 @@ RPC_OMX_ERRORTYPE RPC_SetParameter(OMX_HANDLETYPE hRPCCtx,
       EXIT:
 	if (pPacket)
 		RPC_freePacket(pPacket);
-	if (pRetPacket && *eCompReturn != OMX_ErrorHardware)
+	if (pRetPacket)
 		RPC_freePacket(pRetPacket);
 
 	DOMX_EXIT("");
@@ -437,8 +425,7 @@ RPC_OMX_ERRORTYPE RPC_GetParameter(OMX_HANDLETYPE hRPCCtx,
       EXIT:
 	if (pPacket)
 		RPC_freePacket(pPacket);
-	//In case of Error Hardware this packet gets freed in omx_rpc.c
-	if (pRetPacket && *eCompReturn != OMX_ErrorHardware)
+	if (pRetPacket)
 		RPC_freePacket(pRetPacket);
 
 	DOMX_EXIT("");
@@ -506,7 +493,7 @@ RPC_OMX_ERRORTYPE RPC_SetConfig(OMX_HANDLETYPE hRPCCtx,
       EXIT:
 	if (pPacket)
 		RPC_freePacket(pPacket);
-	if (pRetPacket && *eCompReturn != OMX_ErrorHardware)
+	if (pRetPacket)
 		RPC_freePacket(pRetPacket);
 
 	DOMX_EXIT("");
@@ -583,7 +570,7 @@ RPC_OMX_ERRORTYPE RPC_GetConfig(OMX_HANDLETYPE hRPCCtx,
       EXIT:
 	if (pPacket)
 		RPC_freePacket(pPacket);
-	if (pRetPacket && *eCompReturn != OMX_ErrorHardware)
+	if (pRetPacket)
 		RPC_freePacket(pRetPacket);
 
 	DOMX_EXIT("");
@@ -655,7 +642,7 @@ RPC_OMX_ERRORTYPE RPC_SendCommand(OMX_HANDLETYPE hRPCCtx,
       EXIT:
 	if (pPacket)
 		RPC_freePacket(pPacket);
-	if (pRetPacket && *eCompReturn != OMX_ErrorHardware)
+	if (pRetPacket)
 		RPC_freePacket(pRetPacket);
 
 	DOMX_EXIT("");
@@ -717,7 +704,7 @@ RPC_OMX_ERRORTYPE RPC_GetState(OMX_HANDLETYPE hRPCCtx, OMX_STATETYPE * pState,
       EXIT:
 	if (pPacket)
 		RPC_freePacket(pPacket);
-	if (pRetPacket && *eCompReturn != OMX_ErrorHardware)
+	if (pRetPacket)
 		RPC_freePacket(pRetPacket);
 
 	DOMX_EXIT("");
@@ -788,13 +775,13 @@ RPC_OMX_ERRORTYPE RPC_GetComponentVersion(OMX_HANDLETYPE hRPCCtx,
 		    OMX_VERSIONTYPE);
 		RPC_GETFIELDCOPYTYPE(pRetData, nPos, pSpecVersion,
 		    OMX_VERSIONTYPE);
-		memcpy(pComponentUUID,(OMX_UUIDTYPE *)( (OMX_U32)pRetData + nPos), sizeof(OMX_UUIDTYPE));
+		//RPC_GETFIELDCOPYTYPE(pRetData, nPos, pComponentUUID, OMX_UUIDTYPE);
 	}
 
       EXIT:
 	if (pPacket)
 		RPC_freePacket(pPacket);
-	if (pRetPacket && *eCompReturn != OMX_ErrorHardware)
+	if (pRetPacket)
 		RPC_freePacket(pRetPacket);
 
 	return eRPCError;
@@ -859,7 +846,7 @@ RPC_OMX_ERRORTYPE RPC_GetExtensionIndex(OMX_HANDLETYPE hRPCCtx,
       EXIT:
 	if (pPacket)
 		RPC_freePacket(pPacket);
-	if (pRetPacket && *eCompReturn != OMX_ErrorHardware)
+	if (pRetPacket)
 		RPC_freePacket(pRetPacket);
 
 	return eRPCError;
@@ -988,7 +975,7 @@ RPC_OMX_ERRORTYPE RPC_AllocateBuffer(OMX_HANDLETYPE hRPCCtx,
       EXIT:
 	if (pPacket)
 		RPC_freePacket(pPacket);
-	if (pRetPacket && *eCompReturn != OMX_ErrorHardware)
+	if (pRetPacket)
 		RPC_freePacket(pRetPacket);
 
 	DOMX_EXIT("");
@@ -1151,7 +1138,7 @@ RPC_OMX_ERRORTYPE RPC_UseBuffer(OMX_HANDLETYPE hRPCCtx,
       EXIT:
 	if (pPacket)
 		RPC_freePacket(pPacket);
-	if (pRetPacket && *eCompReturn != OMX_ErrorHardware)
+	if (pRetPacket)
 		RPC_freePacket(pRetPacket);
 
 	DOMX_EXIT("");
@@ -1190,11 +1177,8 @@ RPC_OMX_ERRORTYPE RPC_FreeBuffer(OMX_HANDLETYPE hRPCCtx,
 	RPC_getPacket(nPacketSize, pPacket);
 	RPC_initPacket(pPacket, pOmxPacket, pData, nFxnIdx, nPacketSize);
 
-	/*Offset is the location of the buffer pointer from the start of the data packet */
-	nOffset =  sizeof(RPC_OMX_MAP_INFO_TYPE) + sizeof(OMX_U32) +
-                   sizeof(OMX_HANDLETYPE) + sizeof(OMX_U32) + sizeof(OMX_U32);
 	/*No buffer mapping required */
-	RPC_SETFIELDVALUE(pData, nPos, RPC_OMX_MAP_INFO_ONE_BUF,
+	RPC_SETFIELDVALUE(pData, nPos, RPC_OMX_MAP_INFO_NONE,
 	    RPC_OMX_MAP_INFO_TYPE);
 	RPC_SETFIELDVALUE(pData, nPos, nOffset, OMX_U32);
 
@@ -1213,7 +1197,7 @@ RPC_OMX_ERRORTYPE RPC_FreeBuffer(OMX_HANDLETYPE hRPCCtx,
       EXIT:
 	if (pPacket)
 		RPC_freePacket(pPacket);
-	if (pRetPacket && *eCompReturn != OMX_ErrorHardware)
+	if (pRetPacket)
 		RPC_freePacket(pRetPacket);
 
 	DOMX_EXIT("");
@@ -1321,7 +1305,7 @@ RPC_OMX_ERRORTYPE RPC_EmptyThisBuffer(OMX_HANDLETYPE hRPCCtx,
       EXIT:
 	if (pPacket)
 		RPC_freePacket(pPacket);
-	if (pRetPacket && *eCompReturn != OMX_ErrorHardware)
+	if (pRetPacket)
 		RPC_freePacket(pRetPacket);
 
 	DOMX_EXIT("");
@@ -1400,7 +1384,7 @@ RPC_OMX_ERRORTYPE RPC_FillThisBuffer(OMX_HANDLETYPE hRPCCtx,
       EXIT:
 	if (pPacket)
 		RPC_freePacket(pPacket);
-	if (pRetPacket && *eCompReturn != OMX_ErrorHardware)
+	if (pRetPacket)
 		RPC_freePacket(pRetPacket);
 
 	DOMX_EXIT("");
@@ -1438,52 +1422,9 @@ OMX_ERRORTYPE RPC_FillBufferDone(OMX_HANDLETYPE hRPCCtx, OMX_PTR pAppData,
 }
 
 RPC_OMX_ERRORTYPE RPC_ComponentTunnelRequest(OMX_HANDLETYPE hRPCCtx,
-    OMX_IN OMX_U32 nPort, OMX_HANDLETYPE hTunneledRemoteHandle,
+    OMX_IN OMX_U32 nPort, OMX_HANDLETYPE hTunneledhRemoteHandle,
     OMX_U32 nTunneledPort, OMX_INOUT OMX_TUNNELSETUPTYPE * pTunnelSetup,
-    OMX_ERRORTYPE * eCompReturn)
+    OMX_ERRORTYPE * nCmdStatus)
 {
-	RPC_OMX_ERRORTYPE eRPCError = RPC_OMX_ErrorNone;
-	TIMM_OSAL_ERRORTYPE eError = TIMM_OSAL_ERR_NONE;
-	OMX_U32 nPacketSize = RPC_PACKET_SIZE;
-	RPC_OMX_CONTEXT *hCtx = hRPCCtx;
-	OMX_HANDLETYPE hComp = hCtx->hRemoteHandle;
-       RPC_OMX_CONTEXT   *hTunneledCtx    = hTunneledRemoteHandle;
-        OMX_HANDLETYPE     hTunneledComp   = hTunneledCtx->hRemoteHandle;
-	RPC_OMX_FXN_IDX_TYPE nFxnIdx;
-	struct omx_packet *pOmxPacket = NULL;
-	OMX_U32 nPos = 0, nSize = 0, nOffset = 0;
-	OMX_S32 status = 0;
-#ifdef RPC_SYNC_MODE
-	TIMM_OSAL_PTR pPacket = NULL, pRetPacket = NULL, pData = NULL;
-#endif
-
-        printf(" Entering rpc:domx_stub.c:ComponentTunnelRequest\n");
-
-	nFxnIdx = RPC_OMX_FXN_IDX_COMP_TUNNEL_REQUEST;
-	RPC_getPacket(nPacketSize, pPacket);
-	RPC_initPacket(pPacket, pOmxPacket, pData, nFxnIdx, nPacketSize);
-
-        /*Pack the values into a packet*/
-        //Marshalled:[>ParentComp|>ParentPort|>TunnelComp|>TunneledPort>TunnelSetup]
-	RPC_SETFIELDVALUE(pData, nPos, RPC_OMX_MAP_INFO_NONE, RPC_OMX_MAP_INFO_TYPE);
-        RPC_SETFIELDVALUE(pData, nPos, hComp, OMX_HANDLETYPE);
-        RPC_SETFIELDVALUE(pData, nPos, nPort, OMX_U32);
-        RPC_SETFIELDVALUE(pData, nPos, hTunneledComp, OMX_HANDLETYPE);
-        RPC_SETFIELDVALUE(pData, nPos, nTunneledPort, OMX_U32);
-        printf("\n after RPC_sendPacket_sync");
-	RPC_sendPacket_sync(hCtx, pPacket, nPacketSize, nFxnIdx, pRetPacket,
-	    nSize);
-
-        printf("\n after RPC_sendPacket_sync: *eCompReturn : 0x%x\n", (OMX_ERRORTYPE) (((struct omx_packet *) pRetPacket)->result));
-	*eCompReturn = (OMX_ERRORTYPE) (((struct omx_packet *) pRetPacket)->result);
-
-      EXIT:
-	if (pPacket)
-		RPC_freePacket(pPacket);
-	if (pRetPacket)
-		RPC_freePacket(pRetPacket);
-
-	DOMX_EXIT("");
-	return eRPCError;
-
+	return RPC_OMX_ErrorNone;
 }
