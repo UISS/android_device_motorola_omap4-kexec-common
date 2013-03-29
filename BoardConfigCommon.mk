@@ -1,20 +1,24 @@
-# inherit from kexec if exists
--include device/motorola/kexec/BoardConfig.mk
+#
+# This file sets variables that control the way modules are built
+# thorughout the system. It should not be used to conditionally
+# disable makefiles (the proper mechanism to control what gets
+# included in a build is to use PRODUCT_PACKAGES in a product
+# definition file).
+#
 
 # set to allow building from common
 BOARD_VENDOR := motorola-omap4-kexec
 
-BOARD_USES_KEXEC := true
-ifdef BOARD_USES_KEXEC
-COMMON_GLOBAL_CFLAGS += -DBOARD_USES_KEXEC
-endif
+COMMON_FOLDER := device/motorola/omap4-kexec-common
 
-# includes fix for framebuffer
-TARGET_SPECIFIC_HEADER_PATH := device/motorola/omap4-kexec-common/include
+# Custom includes for kernel and frameworks
+PRODUCT_VENDOR_KERNEL_HEADERS := $(COMMON_FOLDER)/kernel-headers
+TARGET_SPECIFIC_HEADER_PATH := $(COMMON_FOLDER)/include
 
 # Camera
 USE_CAMERA_STUB := false
-TI_CAMERAHAL_DEBUG_ENABLED := true
+#TI_CAMERAHAL_DEBUG_ENABLED := true
+#TI_CAMERAHAL_VERBOSE_DEBUG_ENABLED := true
 
 OMAP_ENHANCEMENT := true
 #OMAP_ENHANCEMENT_BURST_CAPTURE := true
@@ -61,11 +65,27 @@ WLAN_MODULES:
 	mv hardware/ti/wlan/mac80211/compat_wl12xx/drivers/net/wireless/wl12xx/wl12xx.ko $(KERNEL_MODULES_OUT)
 	mv hardware/ti/wlan/mac80211/compat_wl12xx/drivers/net/wireless/wl12xx/wl12xx_spi.ko $(KERNEL_MODULES_OUT)
 	mv hardware/ti/wlan/mac80211/compat_wl12xx/drivers/net/wireless/wl12xx/wl12xx_sdio.ko $(KERNEL_MODULES_OUT)
+	$(ARM_EABI_TOOLCHAIN)/arm-eabi-strip --strip-unneeded $(KERNEL_MODULES_OUT)/compat.ko
+	$(ARM_EABI_TOOLCHAIN)/arm-eabi-strip --strip-unneeded $(KERNEL_MODULES_OUT)/mac80211.ko
+	$(ARM_EABI_TOOLCHAIN)/arm-eabi-strip --strip-unneeded $(KERNEL_MODULES_OUT)/cfg80211.ko
+	$(ARM_EABI_TOOLCHAIN)/arm-eabi-strip --strip-unneeded $(KERNEL_MODULES_OUT)/wl12xx.ko
+	$(ARM_EABI_TOOLCHAIN)/arm-eabi-strip --strip-unneeded $(KERNEL_MODULES_OUT)/wl12xx_spi.ko
+	$(ARM_EABI_TOOLCHAIN)/arm-eabi-strip --strip-unneeded $(KERNEL_MODULES_OUT)/wl12xx_sdio.ko
 
 TARGET_KERNEL_MODULES += WLAN_MODULES
 
+# External SGX Module
+SGX_MODULES:
+	make clean -C $(COMMON_FOLDER)/pvr-source/eurasiacon/build/linux2/omap4430_android
+	cp $(TARGET_KERNEL_SOURCE)/drivers/video/omap2/omapfb/omapfb.h $(KERNEL_OUT)/drivers/video/omap2/omapfb/omapfb.h
+	make -j8 -C $(COMMON_FOLDER)/pvr-source/eurasiacon/build/linux2/omap4430_android ARCH=arm KERNEL_CROSS_COMPILE=arm-eabi- CROSS_COMPILE=arm-eabi- KERNELDIR=$(KERNEL_OUT) TARGET_PRODUCT="blaze_tablet" BUILD=release TARGET_SGX=540 PLATFORM_VERSION=4.0
+	mv $(KERNEL_OUT)/../../target/kbuild/pvrsrvkm_sgx540_120.ko $(KERNEL_MODULES_OUT)
+	$(ARM_EABI_TOOLCHAIN)/arm-eabi-strip --strip-unneeded $(KERNEL_MODULES_OUT)/pvrsrvkm_sgx540_120.ko
+
+TARGET_KERNEL_MODULES += SGX_MODULES
+
 # Storage / Sharing
-BOARD_VOLD_MAX_PARTITIONS := 100
+BOARD_VOLD_MAX_PARTITIONS := 32
 BOARD_VOLD_EMMC_SHARES_DEV_MAJOR := true
 TARGET_USE_CUSTOM_LUN_FILE_PATH := "/sys/devices/virtual/android_usb/android0/f_mass_storage/lun%d/file"
 BOARD_MTP_DEVICE := "/dev/mtp"
@@ -117,10 +137,9 @@ BOARD_ALWAYS_INSECURE := true
 BOARD_HAS_LARGE_FILESYSTEM := true
 BOARD_HAS_SDCARD_INTERNAL := true
 #BOARD_HAS_SDEXT := false
-TARGET_RECOVERY_PRE_COMMAND := "echo 1 > /data/.recovery_mode; sync;"
+TARGET_RECOVERY_PRE_COMMAND := "echo 1 > /data/.recovery_mode; sync; \#"
 TARGET_RECOVERY_PRE_COMMAND_CLEAR_REASON := true
 TARGET_RECOVERY_PIXEL_FORMAT := "BGRA_8888"
-
 
 # Graphics
 BOARD_EGL_CFG := device/motorola/omap4-kexec-common/prebuilt/etc/egl.cfg
@@ -166,11 +185,6 @@ TARGET_NR_SVC_SUPP_GIDS := 28
 BOARD_USE_MOTOROLA_DEV_ALIAS := true
 ifdef BOARD_USE_MOTOROLA_DEV_ALIAS
 COMMON_GLOBAL_CFLAGS += -DBOARD_USE_MOTOROLA_DEV_ALIAS
-endif
-
-USE_MOTOROLA_CODE := true
-ifdef USE_MOTOROLA_CODE
-COMMON_GLOBAL_CFLAGS += -DUSE_MOTOROLA_CODE
 endif
 
 # Media / Radio
