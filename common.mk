@@ -171,7 +171,7 @@ PRODUCT_COPY_FILES += \
     $(COMMON_FOLDER)/kexec/kexec:system/etc/kexec/kexec
 
 # Kexec modules for 1GB devices based on 3.0.8 kernel
-ifndef TARGET_USES_CUSTOM_INITFILES
+ifndef TARGET_USES_CUSTOM_KEXECFILES
 PRODUCT_COPY_FILES += \
     $(COMMON_FOLDER)/kexec/arm_kexec.ko:system/etc/kexec/arm_kexec.ko \
     $(COMMON_FOLDER)/kexec/kexec.ko:system/etc/kexec/kexec.ko \
