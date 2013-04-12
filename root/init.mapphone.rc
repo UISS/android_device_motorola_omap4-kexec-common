@@ -37,10 +37,10 @@ on fs
     mount vfat /dev/block/emstorage /ss
 # end SS3 setup
     mount ext3 loop@/ss/safestrap/rom-slot4/system.img /system wait noatime nodiratime barrier=1
-    mount ext3 /dev/block/pds /pds nosuid nodev noatime nodiratime
     mount ext3 loop@/ss/safestrap/rom-slot4/userdata.img /data nodev noatime nodiratime
     mount ext3 loop@/ss/safestrap/rom-slot4/cache.img /cache nosuid nodev noatime nodiratime
 on post-fs
+    exec /system/bin/pdsbackup.sh
     # Load FIPS kernel module
     exec /system/bin/fips_loader /system/lib/modules
 # Enable PVR modules
@@ -673,12 +673,6 @@ service pvrsrv /system/vendor/bin/pvrsrvinit
     user root
     group root
     oneshot
-service bugtogo /system/bin/bugtogo.sh
-    class main
-    disabled
-    user root
-    oneshot
-    keycodes 114 115
 service pppd-ril /system/bin/pppd-ril /dev/ttyUSB0 call pppd-ril.options plugin /system/lib/libpppd_plugin-ril.so
     class main
     user root
