@@ -1,15 +1,15 @@
-COMMON_FOLDER := device/motorola/omap4-kexec-common
-
-# inherit from kexec if exists
--include device/motorola/kexec/BoardConfig.mk
+#
+# This file sets variables that control the way modules are built
+# thorughout the system. It should not be used to conditionally
+# disable makefiles (the proper mechanism to control what gets
+# included in a build is to use PRODUCT_PACKAGES in a product
+# definition file).
+#
 
 # set to allow building from common
 BOARD_VENDOR := motorola-omap4-kexec
 
-BOARD_USES_KEXEC := true
-ifdef BOARD_USES_KEXEC
-COMMON_GLOBAL_CFLAGS += -DBOARD_USES_KEXEC
-endif
+COMMON_FOLDER := device/motorola/omap4-kexec-common
 
 # Custom includes for kernel and frameworks
 PRODUCT_VENDOR_KERNEL_HEADERS := $(COMMON_FOLDER)/kernel-headers
@@ -128,20 +128,6 @@ BOARD_GPS_LIBRARIES := libgps
 ADDITIONAL_DEFAULT_PROPERTIES += ro.secure=0
 ADDITIONAL_DEFAULT_PROPERTIES += ro.allow.mock.location=1
 
-# Recovery
-BOARD_HAS_LOCKED_BOOTLOADER := true
-TARGET_PREBUILT_RECOVERY_KERNEL := device/motorola/omap4-kexec-common/recovery-kernel
-BOARD_HAS_NO_SELECT_BUTTON := true
-BOARD_UMS_LUNFILE := "/sys/devices/virtual/android_usb/android0/f_mass_storage/lun%d/file"
-BOARD_ALWAYS_INSECURE := true
-BOARD_HAS_LARGE_FILESYSTEM := true
-BOARD_HAS_SDCARD_INTERNAL := true
-#BOARD_HAS_SDEXT := false
-TARGET_RECOVERY_PRE_COMMAND := "echo 1 > /data/.recovery_mode; sync; \#"
-TARGET_RECOVERY_PRE_COMMAND_CLEAR_REASON := true
-TARGET_RECOVERY_PIXEL_FORMAT := "BGRA_8888"
-
-
 # Graphics
 BOARD_EGL_CFG := device/motorola/omap4-kexec-common/prebuilt/etc/egl.cfg
 USE_OPENGL_RENDERER := true
@@ -182,20 +168,6 @@ endif
 # Number of supplementary service groups allowed by init
 TARGET_NR_SVC_SUPP_GIDS := 28
 
-# MOTOROLA
-BOARD_USE_MOTOROLA_DEV_ALIAS := true
-ifdef BOARD_USE_MOTOROLA_DEV_ALIAS
-COMMON_GLOBAL_CFLAGS += -DBOARD_USE_MOTOROLA_DEV_ALIAS
-endif
-
-USE_MOTOROLA_CODE := true
-ifdef USE_MOTOROLA_CODE
-COMMON_GLOBAL_CFLAGS += -DUSE_MOTOROLA_CODE
-endif
-
-# Media / Radio
-# Off currently
-
 # OTA Packaging
 TARGET_PROVIDES_RELEASETOOLS := true
 TARGET_RELEASETOOL_OTA_FROM_TARGET_SCRIPT := device/motorola/omap4-kexec-common/releasetools/common_ota_from_target_files
@@ -214,4 +186,39 @@ LEGACY_RIL := true
 
 # Misc.
 BOARD_USES_LEGACY_RIL := true
+
+
+# Recovery
+TARGET_RECOVERY_PRE_COMMAND := "echo 1 > /data/.recovery_mode; sync; \#"
+TARGET_RECOVERY_PRE_COMMAND_CLEAR_REASON := true
+BOARD_HAS_LOCKED_BOOTLOADER := true
+#TARGET_PREBUILT_RECOVERY_KERNEL := device/motorola/omap4-kexec-common/recovery-kernel
+BOARD_HAS_NO_SELECT_BUTTON := true
+BOARD_UMS_LUNFILE := "/sys/devices/virtual/android_usb/android0/f_mass_storage/lun%d/file"
+BOARD_ALWAYS_INSECURE := true
+BOARD_HAS_LARGE_FILESYSTEM := true
+BOARD_HAS_SDCARD_INTERNAL := true
+#BOARD_HAS_SDEXT := false
+TARGET_RECOVERY_PIXEL_FORMAT := "BGRA_8888"
+
+# TWRP
+DEVICE_RESOLUTION := 540x960
+TW_INTERNAL_STORAGE_PATH := "/sdcard"
+TW_INTERNAL_STORAGE_MOUNT_POINT := "sdcard"
+TW_EXTERNAL_STORAGE_PATH := "/sdcard-ext"
+TW_EXTERNAL_STORAGE_MOUNT_POINT := "sdcard-ext"
+TW_DEFAULT_EXTERNAL_STORAGE := true
+TW_ALWAYS_RMRF := true
+TW_NO_REBOOT_BOOTLOADER := true
+TW_NO_REBOOT_RECOVERY := true
+TW_FLASH_FROM_STORAGE := true
+TW_CUSTOM_POWER_BUTTON := 107
+#TARGET_RECOVERY_INITRC := bootable/recovery/safestrap-common/init/init-motorola-battd.rc
+TW_BRIGHTNESS_PATH := /backlight/brightness
+
+# Safestrap
+BOARD_USE_NEW_LOOPBACK := true
+BOARD_DEFAULT_VIRT_SYSTEM_SIZE := 640
+BOARD_DEFAULT_VIRT_CACHE_SIZE := 260
+TW_CUSTOM_BATTERY_CAPACITY_FIELD := charge_counter
 
