@@ -1,0 +1,8 @@
+on fs
+    symlink /dev/block/systemorig /dev/block/system
+    symlink /dev/block/userdataorig /dev/block/userdata
+    symlink /dev/block/cacheorig /dev/block/cache
+    mount ext3 /dev/block/system /system wait discard noatime nodiratime barrier=1
+    mount ext3 /dev/block/userdata /data discard nosuid nodev noatime nodiratime
+    mount ext3 /dev/block/cache /cache discard nosuid nodev noatime nodiratime
+
